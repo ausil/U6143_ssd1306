@@ -20,6 +20,7 @@
 
 char IPSource[20]={0};
 int i2cd;
+DisplayConfig display_config;
 
 // Init SSD1306
 void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
@@ -27,12 +28,11 @@ void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
   unsigned char count=0;
   FILE* fp;
   unsigned char buffer[20]={0};
-  unsigned char i2c[20]="/dev/i2c-3";
-  // I2C Init
-  i2cd = open(i2c,O_RDWR);
-  if (i2cd < 0) 
+  // I2C Init - use device from config
+  i2cd = open(display_config.i2c_device, O_RDWR);
+  if (i2cd < 0)
   {
-	  fprintf(stderr, "Device I2C-3 failed to initialize\n");
+	  fprintf(stderr, "Device %s failed to initialize\n", display_config.i2c_device);
 	  return;
   }
  if (ioctl(i2cd, I2C_SLAVE_FORCE, i2caddr) < 0)
@@ -256,15 +256,15 @@ void LCD_DisplayTemperature(void)
   buffer[3]='\0';        
   
   OLED_Clear();                                        //Remove the interface
-  OLED_DrawBMP(0,0,128,4,BMP,TEMPERATURE_TYPE);
-  if (IP_SWITCH == IP_DISPLAY_OPEN)
+  OLED_DrawBMP(0,0,128,4,BMP,display_config.temperature_type);
+  if (display_config.ip_switch == IP_DISPLAY_OPEN)
   {
     strcpy(IPSource,GetIpAddress());   //Get the IP address of the device's wireless network card
     OLED_ShowString(0,0,IPSource,8);          //Send the IP address to the lower machine
   }
   else
   {
-    OLED_ShowString(0,0,CUSTOM_DISPLAY,8);          //Send the IP address to the lower machine
+    OLED_ShowString(0,0,display_config.custom_display,8);          //Send the IP address to the lower machine
   }
 
   if(temp>=100)                                                  
@@ -294,7 +294,7 @@ unsigned char Obaintemperature(void)
     fgets(buff,sizeof(buff),fd);
     sscanf(buff, "%d", &temp);
     fclose(fd);
-    return TEMPERATURE_TYPE == FAHRENHEIT ? temp/1000*1.8+32 : temp/1000;
+    return display_config.temperature_type == FAHRENHEIT ? temp/1000*1.8+32 : temp/1000;
 
 }
 
@@ -432,47 +432,21 @@ char* GetIpAddress(void)
     int fd;
     struct ifreq ifr;
     int symbol=0;
-    if (IPADDRESS_TYPE == ETH0_ADDRESS)
+
+    fd = socket(AF_INET, SOCK_DGRAM, 0);
+    /* I want to get an IPv4 IP address */
+    ifr.ifr_addr.sa_family = AF_INET;
+    /* Use network interface from config */
+    strncpy(ifr.ifr_name, display_config.network_interface, IFNAMSIZ-1);
+    symbol=ioctl(fd, SIOCGIFADDR, &ifr);
+    close(fd);
+    if(symbol==0)
     {
-      fd = socket(AF_INET, SOCK_DGRAM, 0);
-      /* I want to get an IPv4 IP address */
-      ifr.ifr_addr.sa_family = AF_INET;
-      /* I want IP address attached to "end0" */
-      strncpy(ifr.ifr_name, "end0", IFNAMSIZ-1);
-      symbol=ioctl(fd, SIOCGIFADDR, &ifr);
-      close(fd);
-      if(symbol==0)
-      {
         return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
-      }
-      else
-      {
-        char* buffer="0.0.0.0";
-        return buffer;
-      }
-    }
-    else if (IPADDRESS_TYPE == WLAN0_ADDRESS)
-    {
-        fd = socket(AF_INET, SOCK_DGRAM, 0);
-        /* I want to get an IPv4 IP address */
-        ifr.ifr_addr.sa_family = AF_INET;
-        /* I want IP address attached to "wlan0" */
-        strncpy(ifr.ifr_name, "wlan0", IFNAMSIZ-1);
-        symbol=ioctl(fd, SIOCGIFADDR, &ifr);
-        close(fd);    
-        if(symbol==0)
-        {
-          return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);   
-        }
-        else
-        {
-          char* buffer="0.0.0.0";
-          return buffer;
-        }
     }
     else
     {
-      char* buffer="0.0.0.0";
-      return buffer;
+        char* buffer="0.0.0.0";
+        return buffer;
     }
 }
