@@ -1,4 +1,4 @@
-Target		= display
+Target		= uctronics-display
 CXX         	= gcc
 CFLAGS		= -Wall -g
 ODIR		= obj

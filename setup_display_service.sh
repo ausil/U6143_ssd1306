@@ -40,7 +40,7 @@ echo "Detected user invoking sudo as '$SUDO_USER', with home directory: $USER_HO
 REPO_BASE_DIR="$USER_HOME/$REPO_NAME"
 C_DIR="$REPO_BASE_DIR/C"      # Directory containing C source code and Makefile
 MAKEFILE_PATH="$C_DIR/Makefile"  # Full path to the Makefile
-EXECUTABLE_PATH="$C_DIR/display" # Path to the compiled executable
+EXECUTABLE_PATH="$C_DIR/uctronics-display" # Path to the compiled executable
 
 echo "Assuming C program path: $C_DIR"
 echo "Assuming Makefile path: $MAKEFILE_PATH"
