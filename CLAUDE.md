@@ -20,7 +20,9 @@ make
 Run manually:
 ```bash
 cd C
-./display
+./display              # Uses default config file locations
+./display -h           # Show help and config file search order
+./display -c custom.conf  # Use custom config file
 ```
 
 Install as systemd service (runs on boot):
@@ -45,9 +47,14 @@ sudo python3 ssd1306_stats.py
 
 ## Configuration
 
-The display is configured via `C/display.conf` (INI-style format). The program loads this file at startup and falls back to defaults if not found.
+The display is configured via an INI-style configuration file. The program searches for configuration in this order:
 
-### Configuration File (`C/display.conf`)
+1. Command-line specified: `./display -c /path/to/config.conf`
+2. System-wide: `/etc/uctronics-display.conf`
+3. Local to executable: `display.conf` (in same directory as binary)
+4. Built-in defaults
+
+### Configuration File Format
 
 ```ini
 # I2C device path
