@@ -4,7 +4,6 @@ Demo for ssd1306 i2c driver for  Raspberry Pi
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgen.h>
 #include <signal.h>
 #include "ssd1306_i2c.h"
 #include "config.h"
@@ -12,7 +11,6 @@ Demo for ssd1306 i2c driver for  Raspberry Pi
 #include <unistd.h>
 
 #define SYSTEM_CONFIG_FILE "/etc/uctronics-display.conf"
-#define LOCAL_CONFIG_FILE "display.conf"
 
 /* Global flag for signal handling */
 static volatile sig_atomic_t keep_running = 1;
@@ -26,8 +24,8 @@ void signal_handler(int signum)
 /* Cleanup function - closes resources and clears display */
 void cleanup(void)
 {
-    printf("Cleaning up...\n");
     if (i2cd >= 0) {
+        printf("Cleaning up...\n");
         OLED_Clear();
         close(i2cd);
         i2cd = -1;
@@ -48,8 +46,7 @@ void print_usage(const char *prog_name)
     printf("\n");
     printf("Configuration file search order (if -c not specified):\n");
     printf("  1. %s\n", SYSTEM_CONFIG_FILE);
-    printf("  2. %s (in same directory as executable)\n", LOCAL_CONFIG_FILE);
-    printf("  3. Built-in defaults\n");
+    printf("  2. Built-in defaults\n");
     printf("\n");
 }
 
@@ -121,24 +118,9 @@ int main(int argc, char *argv[])
             return 1;
         }
     } else {
-        /* Try default locations in order */
-        /* 1. System-wide config */
+        /* Try system-wide config */
         if (try_load_config(SYSTEM_CONFIG_FILE)) {
             config_loaded = 1;
-        }
-        /* 2. Local config in executable directory */
-        else {
-            char exe_path[1024];
-            char local_config_path[1024];
-            ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-            if (len != -1) {
-                exe_path[len] = '\0';
-                char *exe_dir = dirname(exe_path);
-                snprintf(local_config_path, sizeof(local_config_path), "%s/%s", exe_dir, LOCAL_CONFIG_FILE);
-                if (try_load_config(local_config_path)) {
-                    config_loaded = 1;
-                }
-            }
         }
     }
 

@@ -20,7 +20,7 @@
 
 
 char IPSource[20]={0};
-int i2cd;
+int i2cd = -1;  // Initialize to -1 to indicate not opened
 DisplayConfig display_config;
 
 // Init SSD1306
