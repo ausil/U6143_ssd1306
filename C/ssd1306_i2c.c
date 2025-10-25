@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/sysinfo.h>
 #include <sys/vfs.h>
 #include "ssd1306_i2c.h"
@@ -32,11 +33,16 @@ void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
   i2cd = open(display_config.i2c_device, O_RDWR);
   if (i2cd < 0)
   {
-	  fprintf(stderr, "Device %s failed to initialize\n", display_config.i2c_device);
+	  fprintf(stderr, "Error: Device %s failed to initialize: %s\n",
+	          display_config.i2c_device, strerror(errno));
 	  return;
   }
  if (ioctl(i2cd, I2C_SLAVE_FORCE, i2caddr) < 0)
   {
+    fprintf(stderr, "Error: Failed to set I2C slave address 0x%02x: %s\n",
+            i2caddr, strerror(errno));
+    close(i2cd);
+    i2cd = -1;
     return;
   }
 	OLED_WR_Byte(0xAE,OLED_CMD);//Disable display
@@ -165,7 +171,10 @@ void Write_IIC_Data(unsigned char IIC_Data)
 {
   unsigned char msg[2]={0x40,0};
   msg[1]=IIC_Data;
-  write(i2cd, msg, 2);
+  ssize_t result = write(i2cd, msg, 2);
+  if (result != 2) {
+    fprintf(stderr, "Error: Failed to write I2C data: %s\n", strerror(errno));
+  }
 }
 
 //Send the command
@@ -173,7 +182,10 @@ void Write_IIC_Command(unsigned char IIC_Command)
 {
   unsigned char msg[2]={0x00,0};
   msg[1]=IIC_Command;
-  write(i2cd, msg, 2);
+  ssize_t result = write(i2cd, msg, 2);
+  if (result != 2) {
+    fprintf(stderr, "Error: Failed to write I2C command: %s\n", strerror(errno));
+  }
 }
 
 
@@ -251,20 +263,30 @@ void LCD_DisplayTemperature(void)
   unsigned char  buffer[80] = {0};
   temp=Obaintemperature();                  //Gets the temperature of the CPU
   fp=popen("top -bn1 | grep load | awk '{printf \"%.2f\", $(NF-2)}'","r");    //Gets the load on the CPU
-  fgets(buffer, sizeof (buffer),fp);                                    //Read the CPU load
-  pclose(fp);
+  if (fp == NULL) {
+    fprintf(stderr, "Error: Failed to execute command for CPU load: %s\n", strerror(errno));
+    strcpy(buffer, "0.00");
+  } else {
+    if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+      strcpy(buffer, "0.00");
+    }
+    pclose(fp);
+  }
   buffer[3]='\0';        
   
   OLED_Clear();                                        //Remove the interface
   OLED_DrawBMP(0,0,128,4,BMP,display_config.temperature_type);
   if (display_config.ip_switch == IP_DISPLAY_OPEN)
   {
-    strcpy(IPSource,GetIpAddress());   //Get the IP address of the device's wireless network card
+    char* ip = GetIpAddress();   //Get the IP address of the device's wireless network card
+    if (ip != NULL) {
+      strcpy(IPSource, ip);
+    }
     OLED_ShowString(0,0,IPSource,8);          //Send the IP address to the lower machine
   }
   else
   {
-    OLED_ShowString(0,0,display_config.custom_display,8);          //Send the IP address to the lower machine
+    OLED_ShowString(0,0,display_config.custom_display,8);          //Send the custom text to the lower machine
   }
 
   if(temp>=100)                                                  
@@ -288,10 +310,18 @@ void LCD_DisplayTemperature(void)
 unsigned char Obaintemperature(void)
 {
     FILE *fd;
-    unsigned int temp;
+    unsigned int temp = 0;
     char buff[150] = {0};
     fd = fopen("/sys/class/thermal/thermal_zone0/temp","r");
-    fgets(buff,sizeof(buff),fd);
+    if (fd == NULL) {
+        fprintf(stderr, "Error: Failed to read temperature: %s\n", strerror(errno));
+        return 0;  // Return 0 on error
+    }
+    if (fgets(buff, sizeof(buff), fd) == NULL) {
+        fprintf(stderr, "Error: Failed to read temperature data: %s\n", strerror(errno));
+        fclose(fd);
+        return 0;
+    }
     sscanf(buff, "%d", &temp);
     fclose(fd);
     return display_config.temperature_type == FAHRENHEIT ? temp/1000*1.8+32 : temp/1000;
@@ -422,9 +452,15 @@ void LCD_Display(unsigned char symbol)
 }
 
 
-void FirstGetIpAddress(void)
+int FirstGetIpAddress(void)
 {
-  strcpy(IPSource,GetIpAddress());     
+    char* ip = GetIpAddress();
+    if (ip != NULL) {
+        strcpy(IPSource, ip);
+        return 1;  // Success
+    }
+    strcpy(IPSource, "0.0.0.0");
+    return 0;  // Failure
 }
 
 char* GetIpAddress(void)
@@ -434,19 +470,28 @@ char* GetIpAddress(void)
     int symbol=0;
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        fprintf(stderr, "Error: Failed to create socket for network query: %s\n", strerror(errno));
+        return NULL;
+    }
+
     /* I want to get an IPv4 IP address */
     ifr.ifr_addr.sa_family = AF_INET;
     /* Use network interface from config */
     strncpy(ifr.ifr_name, display_config.network_interface, IFNAMSIZ-1);
+    ifr.ifr_name[IFNAMSIZ-1] = '\0';  // Ensure null termination
+
     symbol=ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);
+
     if(symbol==0)
     {
         return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
     }
     else
     {
-        char* buffer="0.0.0.0";
-        return buffer;
+        fprintf(stderr, "Warning: Failed to get IP address for interface %s: %s\n",
+                display_config.network_interface, strerror(errno));
+        return NULL;
     }
 }

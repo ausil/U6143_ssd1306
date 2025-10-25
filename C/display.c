@@ -5,6 +5,7 @@ Demo for ssd1306 i2c driver for  Raspberry Pi
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
+#include <signal.h>
 #include "ssd1306_i2c.h"
 #include "config.h"
 #include "time.h"
@@ -12,6 +13,27 @@ Demo for ssd1306 i2c driver for  Raspberry Pi
 
 #define SYSTEM_CONFIG_FILE "/etc/uctronics-display.conf"
 #define LOCAL_CONFIG_FILE "display.conf"
+
+/* Global flag for signal handling */
+static volatile sig_atomic_t keep_running = 1;
+
+/* Signal handler for graceful shutdown */
+void signal_handler(int signum)
+{
+    keep_running = 0;
+}
+
+/* Cleanup function - closes resources and clears display */
+void cleanup(void)
+{
+    printf("Cleaning up...\n");
+    if (i2cd >= 0) {
+        OLED_Clear();
+        close(i2cd);
+        i2cd = -1;
+        printf("I2C device closed\n");
+    }
+}
 
 /* Print usage information */
 void print_usage(const char *prog_name)
@@ -49,6 +71,23 @@ int main(int argc, char *argv[])
     unsigned char symbol=0;
     const char *config_file = NULL;
     int config_loaded = 0;
+    struct sigaction sa;
+
+    /* Register cleanup function to be called on exit */
+    atexit(cleanup);
+
+    /* Setup signal handlers for graceful shutdown */
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+
+    if (sigaction(SIGINT, &sa, NULL) == -1) {
+        fprintf(stderr, "Warning: Failed to register SIGINT handler\n");
+    }
+    if (sigaction(SIGTERM, &sa, NULL) == -1) {
+        fprintf(stderr, "Warning: Failed to register SIGTERM handler\n");
+    }
 
     /* Parse command-line arguments */
     for (int i = 1; i < argc; i++) {
@@ -115,24 +154,29 @@ int main(int argc, char *argv[])
     ssd1306_begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS);      //LCD Screen initialization
     if(i2cd<0)
     {
-        printf("I2C device failed to open\r\n");
+        fprintf(stderr, "Error: I2C device failed to open\n");
         return 1;
     }
     usleep(150*1000);                                                  //Short delay Ensure the normal response of the lower function
-    FirstGetIpAddress();                        //Get IP address
+
+    if (!FirstGetIpAddress()) {
+        fprintf(stderr, "Warning: Failed to get IP address, will use fallback\n");
+    }
+
+    printf("Display initialized successfully. Press Ctrl+C to exit.\n");
 
     /* Main display loop */
-    while(1)
+    while(keep_running)
     {
         LCD_Display(symbol);
-        sleep(1);
-        sleep(1);
-        sleep(1);
+        sleep(3);  // Sleep for 3 seconds between display modes
         symbol++;
         if(symbol==3)
         {
           symbol=0;
         }
     }
+
+    printf("\nShutdown signal received, exiting gracefully...\n");
     return 0;
 }
