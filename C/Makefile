@@ -11,6 +11,10 @@ PREFIX		?= /usr
 DESTDIR		?=
 BINDIR		= $(PREFIX)/bin
 SYSCONFDIR	= /etc
+SYSTEMDDIR	= /etc/systemd/system
+
+# Service file
+SERVICEFILE	= uctronics-display.service
 
 $(Target): $(OBJ)
 	$(CXX) $(CFLAGS) $^ -o $@ -rdynamic
@@ -18,15 +22,41 @@ $(Target): $(OBJ)
 %.o: %.c
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean install uninstall
+.PHONY: clean install uninstall install-service uninstall-service enable-service disable-service
 clean:
 	rm -rf *.o
 	rm -rf $(Target)
 
-install: $(Target)
+install: $(Target) install-service
 	install -D -m 0755 $(Target) $(DESTDIR)$(BINDIR)/uctronics-display
 	install -D -m 0644 display.conf $(DESTDIR)$(SYSCONFDIR)/uctronics-display.conf
+	@echo ""
+	@echo "Installation complete!"
+	@echo "To enable and start the service, run:"
+	@echo "  sudo systemctl enable --now uctronics-display.service"
+	@echo ""
 
-uninstall:
+install-service:
+	install -D -m 0644 $(SERVICEFILE) $(DESTDIR)$(SYSTEMDDIR)/$(SERVICEFILE)
+
+uninstall: uninstall-service
 	rm -f $(DESTDIR)$(BINDIR)/uctronics-display
 	rm -f $(DESTDIR)$(SYSCONFDIR)/uctronics-display.conf
+	@echo "Uninstallation complete."
+
+uninstall-service:
+	systemctl stop $(SERVICEFILE) 2>/dev/null || true
+	systemctl disable $(SERVICEFILE) 2>/dev/null || true
+	rm -f $(DESTDIR)$(SYSTEMDDIR)/$(SERVICEFILE)
+	systemctl daemon-reload 2>/dev/null || true
+
+enable-service:
+	systemctl daemon-reload
+	systemctl enable $(SERVICEFILE)
+	systemctl start $(SERVICEFILE)
+	@echo "Service enabled and started. Check status with: systemctl status $(SERVICEFILE)"
+
+disable-service:
+	systemctl stop $(SERVICEFILE)
+	systemctl disable $(SERVICEFILE)
+	@echo "Service stopped and disabled."

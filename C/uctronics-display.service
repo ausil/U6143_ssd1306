@@ -1,0 +1,17 @@
+[Unit]
+Description=UCTRONICS SSD1306 OLED Display Service
+Documentation=https://github.com/UCTRONICS/U6143_ssd1306
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/uctronics-display
+Restart=on-failure
+RestartSec=5s
+
+# Run as root for I2C hardware access
+# Alternative: create an 'i2c' group and add user to it
+User=root
+
+[Install]
+WantedBy=multi-user.target
