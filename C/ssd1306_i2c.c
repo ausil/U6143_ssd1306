@@ -32,9 +32,9 @@ void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
   i2cd = open(display_config.i2c_device, O_RDWR);
   if (i2cd < 0)
   {
-	  log_error("Device %s failed to initialize: %s",
-	          display_config.i2c_device, strerror(errno));
-	  return;
+    log_error("Device %s failed to initialize: %s",
+            display_config.i2c_device, strerror(errno));
+    return;
   }
   log_debug("Setting I2C slave address to 0x%02x", i2caddr);
  if (ioctl(i2cd, I2C_SLAVE_FORCE, i2caddr) < 0)
@@ -46,29 +46,29 @@ void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
     return;
   }
   log_debug("I2C device initialized successfully");
-	OLED_WR_Byte(0xAE,OLED_CMD);//Disable display
-	OLED_WR_Byte(0x40,OLED_CMD);//---set low column address
-	OLED_WR_Byte(0xB0,OLED_CMD);//---set high column address
-	OLED_WR_Byte(0xC8,OLED_CMD);//-not offset
-	OLED_WR_Byte(0x81,OLED_CMD);//Set Contrast
-	OLED_WR_Byte(0xff,OLED_CMD);
-	OLED_WR_Byte(0xa1,OLED_CMD);
-	OLED_WR_Byte(0xa6,OLED_CMD);
-	OLED_WR_Byte(0xa8,OLED_CMD);
-	OLED_WR_Byte(0x1f,OLED_CMD);
-	OLED_WR_Byte(0xd3,OLED_CMD);
-	OLED_WR_Byte(0x00,OLED_CMD);
-	OLED_WR_Byte(0xd5,OLED_CMD);
-	OLED_WR_Byte(0xf0,OLED_CMD);
-	OLED_WR_Byte(0xd9,OLED_CMD);
-	OLED_WR_Byte(0x22,OLED_CMD);
-	OLED_WR_Byte(0xda,OLED_CMD);
-	OLED_WR_Byte(0x02,OLED_CMD);
-	OLED_WR_Byte(0xdb,OLED_CMD);
-	OLED_WR_Byte(0x49,OLED_CMD);
-	OLED_WR_Byte(0x8d,OLED_CMD);
-	OLED_WR_Byte(0x14,OLED_CMD);
-	OLED_WR_Byte(0xaf,OLED_CMD);
+  OLED_WR_Byte(0xAE,OLED_CMD);//Disable display
+  OLED_WR_Byte(0x40,OLED_CMD);//---set low column address
+  OLED_WR_Byte(0xB0,OLED_CMD);//---set high column address
+  OLED_WR_Byte(0xC8,OLED_CMD);//-not offset
+  OLED_WR_Byte(0x81,OLED_CMD);//Set Contrast
+  OLED_WR_Byte(0xff,OLED_CMD);
+  OLED_WR_Byte(0xa1,OLED_CMD);
+  OLED_WR_Byte(0xa6,OLED_CMD);
+  OLED_WR_Byte(0xa8,OLED_CMD);
+  OLED_WR_Byte(0x1f,OLED_CMD);
+  OLED_WR_Byte(0xd3,OLED_CMD);
+  OLED_WR_Byte(0x00,OLED_CMD);
+  OLED_WR_Byte(0xd5,OLED_CMD);
+  OLED_WR_Byte(0xf0,OLED_CMD);
+  OLED_WR_Byte(0xd9,OLED_CMD);
+  OLED_WR_Byte(0x22,OLED_CMD);
+  OLED_WR_Byte(0xda,OLED_CMD);
+  OLED_WR_Byte(0x02,OLED_CMD);
+  OLED_WR_Byte(0xdb,OLED_CMD);
+  OLED_WR_Byte(0x49,OLED_CMD);
+  OLED_WR_Byte(0x8d,OLED_CMD);
+  OLED_WR_Byte(0x14,OLED_CMD);
+  OLED_WR_Byte(0xaf,OLED_CMD);
 }
 
 
@@ -78,91 +78,91 @@ void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
 //Displays a string of characters
 void OLED_ShowString(unsigned char x,unsigned char y,unsigned char *chr,unsigned char Char_Size)
 {
-	unsigned char j=0;
-	while (chr[j]!='\0')
-	{		OLED_ShowChar(x,y,chr[j],Char_Size);
-			x+=8;
-		if(x>120){x=0;y+=2;}
-			j++;
-	}
+  unsigned char j=0;
+  while (chr[j]!='\0')
+  {    OLED_ShowChar(x,y,chr[j],Char_Size);
+      x+=8;
+    if(x>120){x=0;y+=2;}
+      j++;
+  }
 }
 
 void OLED_ShowChar(unsigned char x,unsigned char y,unsigned char chr,unsigned char Char_Size)
-{      	
-	unsigned char c=0,i=0;	
-		c=chr-' ';    //Get the offset value	
-		if(x>SSD1306_LCDWIDTH-1){x=0;y=y+2;}
-		if(Char_Size ==16)
-		{
-			OLED_Set_Pos(x,y);	
-			for(i=0;i<8;i++)
-			OLED_WR_Byte(F8X16[c*16+i],OLED_DATA);
-			OLED_Set_Pos(x,y+1);
-			for(i=0;i<8;i++)
-			OLED_WR_Byte(F8X16[c*16+i+8],OLED_DATA);
-		}
+{
+  unsigned char c=0,i=0;
+    c=chr-' ';    //Get the offset value
+    if(x>SSD1306_LCDWIDTH-1){x=0;y=y+2;}
+    if(Char_Size ==16)
+    {
+      OLED_Set_Pos(x,y);
+      for(i=0;i<8;i++)
+      OLED_WR_Byte(F8X16[c*16+i],OLED_DATA);
+      OLED_Set_Pos(x,y+1);
+      for(i=0;i<8;i++)
+      OLED_WR_Byte(F8X16[c*16+i+8],OLED_DATA);
+    }
 
-		else {	
-				OLED_Set_Pos(x,y);
-				for(i=0;i<6;i++)
-				OLED_WR_Byte(F6x8[c][i],OLED_DATA);
-				
-			}
+    else {
+        OLED_Set_Pos(x,y);
+        for(i=0;i<6;i++)
+        OLED_WR_Byte(F6x8[c][i],OLED_DATA);
+
+      }
 }
 
 unsigned int oled_pow(unsigned char m,unsigned char n)
 {
-	unsigned int result=1;	
-	while(n--)result*=m;
-	return result;
-}	
+  unsigned int result=1;
+  while(n--)result*=m;
+  return result;
+}
 
 //According to digital
-//x,y :Starting point coordinates	
+//x,y :Starting point coordinates
 //len :Number of digits
 //size:The font size
-//mode:	0,Fill mode;1,Stacking patterns
-//num:(0~4294967295);	 		
+//mode:  0,Fill mode;1,Stacking patterns
+//num:(0~4294967295);
 void OLED_ShowNum(unsigned char x,unsigned char y,unsigned int num,unsigned char len,unsigned char size2)
-{         	
-	unsigned char t,temp;
-	unsigned char enshow=0;						
-	for(t=0;t<len;t++)
-	{
-		temp=(num/oled_pow(10,len-t-1))%10;
-		if(enshow==0&&t<(len-1))
-		{
-			if(temp==0)
-			{
-				OLED_ShowChar(x+(size2/2)*t,y,' ',size2);
-				continue;
-			}else enshow=1;
-		 	
-		}
-	 	OLED_ShowChar(x+(size2/2)*t,y,temp+'0',size2);
-	}
+{
+  unsigned char t,temp;
+  unsigned char enshow=0;
+  for(t=0;t<len;t++)
+  {
+    temp=(num/oled_pow(10,len-t-1))%10;
+    if(enshow==0&&t<(len-1))
+    {
+      if(temp==0)
+      {
+        OLED_ShowChar(x+(size2/2)*t,y,' ',size2);
+        continue;
+      }else enshow=1;
+
+    }
+     OLED_ShowChar(x+(size2/2)*t,y,temp+'0',size2);
+  }
 }
 
 
 //Coordinate setting
 void OLED_Set_Pos(unsigned char x, unsigned char y)
-{ 	OLED_WR_Byte(0xb0+y,OLED_CMD);
-	OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
-	OLED_WR_Byte((x&0x0f),OLED_CMD);
+{   OLED_WR_Byte(0xb0+y,OLED_CMD);
+  OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
+  OLED_WR_Byte((x&0x0f),OLED_CMD);
 }
 
 //Write a byte
 void OLED_WR_Byte(unsigned dat,unsigned cmd)
 {
 
-	if(cmd)
-	{
-		Write_IIC_Data(dat);
-	}
-	else
-	{
-		Write_IIC_Command(dat);
-	}
+  if(cmd)
+  {
+    Write_IIC_Data(dat);
+  }
+  else
+  {
+    Write_IIC_Command(dat);
+  }
 
   usleep(500);
 }
@@ -192,65 +192,65 @@ void Write_IIC_Command(unsigned char IIC_Command)
 
 /***********Display the BMP image  128X32  Starting point coordinates(x,y),The range of x 0~127   The range of y 0~4*****************/
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[][512],unsigned char symbol)
-{ 	
+{
  unsigned int j=0;
  unsigned char x,y;
 
   if(y1%8==0) y=y1/8;
   else y=y1/8+1;
-	for(y=y0;y<y1;y++)
-	{
-		OLED_Set_Pos(x0,y);
-		for(x=x0;x<x1;x++)
-		{
-			OLED_WR_Byte(BMP[symbol][j++],OLED_DATA);	    	
-		}
-	}
+  for(y=y0;y<y1;y++)
+  {
+    OLED_Set_Pos(x0,y);
+    for(x=x0;x<x1;x++)
+    {
+      OLED_WR_Byte(BMP[symbol][j++],OLED_DATA);
+    }
+  }
 }
 
 
 void OLED_DrawPartBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[][512],unsigned char symbol)
-{ 	
+{
  unsigned int j=x1*y0;
  unsigned char x,y;
 
   if(y1%8==0) y=y1/8;
   else y=y1/8+1;
-	for(y=y0;y<y1;y++)
-	{
-		OLED_Set_Pos(x0,y);
-		for(x=x0;x<x1;x++)
-		{
-			OLED_WR_Byte(BMP[symbol][j++],OLED_DATA);	    	
-		}
-	}
+  for(y=y0;y<y1;y++)
+  {
+    OLED_Set_Pos(x0,y);
+    for(x=x0;x<x1;x++)
+    {
+      OLED_WR_Byte(BMP[symbol][j++],OLED_DATA);
+    }
+  }
 }
 
 /*
-*	Clear specified row
+*  Clear specified row
 */
 void OLED_ClearLint(unsigned char x1,unsigned char x2)
 {
-	unsigned char i,n;		
-	for(i=x1;i<x2;i++)
-	{
-		OLED_WR_Byte (0xb0+i,OLED_CMD);    //Set page address
-		OLED_WR_Byte (0x00,OLED_CMD);      //Sets the display location - column low address
-		OLED_WR_Byte (0x10,OLED_CMD);      //Sets the display location - column high address
-		for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA);
-	}
-}	
+  unsigned char i,n;
+  for(i=x1;i<x2;i++)
+  {
+    OLED_WR_Byte (0xb0+i,OLED_CMD);    //Set page address
+    OLED_WR_Byte (0x00,OLED_CMD);      //Sets the display location - column low address
+    OLED_WR_Byte (0x10,OLED_CMD);      //Sets the display location - column high address
+    for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA);
+  }
+}
 
 void OLED_Clear(void)
 {
-	unsigned char i,n;		
-	for(i=0;i<4;i++)
-	{
-		OLED_WR_Byte (0xb0+i,OLED_CMD);
-		OLED_WR_Byte (0x00,OLED_CMD);
-		OLED_WR_Byte (0x10,OLED_CMD);
-		for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA);
-	}
+  unsigned char i,n;
+  for(i=0;i<4;i++)
+  {
+    OLED_WR_Byte (0xb0+i,OLED_CMD);
+    OLED_WR_Byte (0x00,OLED_CMD);
+    OLED_WR_Byte (0x10,OLED_CMD);
+    for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA);
+  }
 }
 
 /*
@@ -369,15 +369,15 @@ void LCD_DisPlayCpuMemory(void)
     {
       if(sscanf(buffer,"%s%u",famer,&value)!=2)
       {
-	continue;
+  continue;
       }
       if(strcmp(famer,"MemTotal:")==0)
       {
-	Totalram=value/1024.0/1024.0;
+  Totalram=value/1024.0/1024.0;
       }
       else if(strcmp(famer,"MemFree:")==0)
       {
-	freeram=value/1024.0/1024.0;
+  freeram=value/1024.0/1024.0;
       }
     }
     fclose(fp);
@@ -410,7 +410,7 @@ void LCD_DisplaySdMemory(void)
   OLED_ClearLint(2,4);
   OLED_DrawPartBMP(0,2,128,4,BMP,3);
   unsigned long long blocksize = diskInfo.f_bsize;// The number of bytes per block
-  unsigned long long totalsize = blocksize*diskInfo.f_blocks;//Total number of bytes	
+  unsigned long long totalsize = blocksize*diskInfo.f_blocks;//Total number of bytes
   MemSize=(unsigned int)(totalsize>>30);
   snprintf(totalsize_GB,7,"%d",MemSize);
   if(MemSize>0&&MemSize<10)
@@ -427,7 +427,7 @@ void LCD_DisplaySdMemory(void)
   }
 
 
-	unsigned long long freesize = blocksize*diskInfo.f_bfree; //Now let's figure out how much space we have left
+  unsigned long long freesize = blocksize*diskInfo.f_bfree; //Now let's figure out how much space we have left
   size=freesize>>30;
   size=MemSize-size;
   snprintf(usedsize_GB,7,"%d",size);

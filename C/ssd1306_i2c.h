@@ -16,9 +16,9 @@ extern DisplayConfig display_config;
 #define WHITE 1
 #define INVERSE 2
 
-#define OLED_CMD  0	                 //command
-#define OLED_DATA 1	                //data
-#define SSD1306_I2C_ADDRESS   0x3C	// 011110+SA0+RW - 0x0C    
+#define OLED_CMD  0                       //command
+#define OLED_DATA 1                       //data
+#define SSD1306_I2C_ADDRESS   0x3C        // 011110+SA0+RW - 0x0C
 #define SSD1306_SWITCHCAPVCC 0x2
 
 #define SSD1306_LCDWIDTH                  128
@@ -27,7 +27,7 @@ void ssd1306_begin(unsigned int switchvcc, unsigned int i2caddr); //switchvcc sh
 void OLED_ShowString(unsigned char x,unsigned char y, unsigned char *p,unsigned char Char_Size);
 void OLED_ShowChar(unsigned char x,unsigned char y,unsigned char chr,unsigned char Char_Size);
 void OLED_Set_Pos(unsigned char x, unsigned char y);
-void OLED_WR_Byte(unsigned dat,unsigned cmd);  
+void OLED_WR_Byte(unsigned dat,unsigned cmd);
 void Write_IIC_Data(unsigned char IIC_Data);
 void Write_IIC_Command(unsigned char IIC_Command);
 void OLED_DrawBMP(unsigned char x0, unsigned char y0,unsigned char x1, unsigned char y1,unsigned char BMP[][512],unsigned char);
@@ -42,4 +42,4 @@ void LCD_DisplaySdMemory(void);
 int FirstGetIpAddress(void);
 char* GetIpAddress(void);
 unsigned char Obaintemperature(void);
-#endif				/* _SSD1306_I2C_H_ */
+#endif                                /* _SSD1306_I2C_H_ */

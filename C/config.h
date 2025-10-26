@@ -15,7 +15,7 @@
 
 /* Configuration structure */
 typedef struct {
-    char i2c_device[64];           /* I2C device path, e.g., "/dev/i2c-3" */
+    char i2c_device[64];            /* I2C device path, e.g., "/dev/i2c-3" */
     int temperature_type;           /* CELSIUS or FAHRENHEIT */
     int ip_switch;                  /* IP_DISPLAY_OPEN or IP_DISPLAY_CLOSE */
     char custom_display[32];        /* Custom text when IP display is closed */
