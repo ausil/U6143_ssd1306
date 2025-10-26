@@ -64,12 +64,19 @@ sudo make install
 This installs:
 - Binary → `/usr/bin/uctronics-display`
 - Config → `/etc/uctronics-display.conf`
-- Service → `/etc/systemd/system/uctronics-display.service`
+- Service → `/usr/lib/systemd/system/uctronics-display.service`
+- Preset → `/usr/lib/systemd/system-preset/90-uctronics-display.preset`
 
 ### 4. Enable Auto-Start on Boot
 
+The systemd preset file automatically enables the service on installation. To manually control:
+
 ```bash
+# Enable and start
 sudo systemctl enable --now uctronics-display.service
+
+# Or use systemd presets
+sudo systemctl preset uctronics-display.service
 ```
 
 ## Usage
@@ -168,7 +175,7 @@ sudo make uninstall
 
 This will:
 - Stop and disable the service
-- Remove the service file
+- Remove the service and preset files
 - Remove the binary and configuration
 
 ## Building from Source

@@ -222,6 +222,7 @@ Current version: **1.0.0**
 - **New:** Graceful shutdown with signal handling
 - **New:** Comprehensive error handling
 - **New:** Version flag (`--version` / `-v`)
+- **New:** Systemd preset file for automatic service enablement
 - **Changed:** Binary renamed from `display` to `uctronics-display`
 - **Changed:** Configuration via file instead of editing header files
 - **Improved:** Systemd service integration

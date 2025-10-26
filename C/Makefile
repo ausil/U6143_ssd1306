@@ -12,10 +12,12 @@ PREFIX		?= /usr
 DESTDIR		?=
 BINDIR		= $(PREFIX)/bin
 SYSCONFDIR	= /etc
-SYSTEMDDIR	= /etc/systemd/system
+SYSTEMDDIR	= $(PREFIX)/lib/systemd/system
+PRESETDIR	= $(PREFIX)/lib/systemd/system-preset
 
-# Service file
+# Service files
 SERVICEFILE	= uctronics-display.service
+PRESETFILE	= 90-uctronics-display.preset
 
 $(Target): $(OBJ)
 	$(CXX) $(CFLAGS) $^ -o $@ -rdynamic
@@ -39,6 +41,7 @@ install: $(Target) install-service
 
 install-service:
 	install -D -m 0644 $(SERVICEFILE) $(DESTDIR)$(SYSTEMDDIR)/$(SERVICEFILE)
+	install -D -m 0644 $(PRESETFILE) $(DESTDIR)$(PRESETDIR)/$(PRESETFILE)
 
 uninstall: uninstall-service
 	rm -f $(DESTDIR)$(BINDIR)/uctronics-display
@@ -49,6 +52,7 @@ uninstall-service:
 	systemctl stop $(SERVICEFILE) 2>/dev/null || true
 	systemctl disable $(SERVICEFILE) 2>/dev/null || true
 	rm -f $(DESTDIR)$(SYSTEMDDIR)/$(SERVICEFILE)
+	rm -f $(DESTDIR)$(PRESETDIR)/$(PRESETFILE)
 	systemctl daemon-reload 2>/dev/null || true
 
 enable-service:
@@ -85,7 +89,7 @@ release: clean
 	@mkdir -p $(RELEASE_DIR)
 	@mkdir -p $(RELEASE_DIR)/tests
 	@cp *.c *.h Makefile $(RELEASE_DIR)/
-	@cp display.conf $(SERVICEFILE) README.md $(RELEASE_DIR)/
+	@cp display.conf $(SERVICEFILE) $(PRESETFILE) README.md $(RELEASE_DIR)/
 	@cp tests/*.c tests/*.h tests/*.conf tests/README.md $(RELEASE_DIR)/tests/
 	@tar -czf $(RELEASE_NAME).tar.gz -C /tmp $(RELEASE_NAME)
 	@rm -rf $(RELEASE_DIR)
