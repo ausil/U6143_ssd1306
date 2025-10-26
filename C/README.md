@@ -36,7 +36,7 @@ cd U6143_ssd1306/C
 
 ### 2. Configure (Optional)
 
-Edit `display.conf` to match your hardware:
+Edit `uctronics-display.conf` to match your hardware:
 ```ini
 # I2C device path
 i2c_device = /dev/i2c-3

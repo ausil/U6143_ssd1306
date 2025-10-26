@@ -32,7 +32,7 @@ clean: test-clean
 
 install: $(Target) install-service
 	install -D -m 0755 $(Target) $(DESTDIR)$(BINDIR)/uctronics-display
-	install -D -m 0644 display.conf $(DESTDIR)$(SYSCONFDIR)/uctronics-display.conf
+	install -D -m 0644 uctronics-display.conf $(DESTDIR)$(SYSCONFDIR)/uctronics-display.conf
 	@echo ""
 	@echo "Installation complete!"
 	@echo "To enable and start the service, run:"
@@ -89,7 +89,7 @@ release: clean
 	@mkdir -p $(RELEASE_DIR)
 	@mkdir -p $(RELEASE_DIR)/tests
 	@cp *.c *.h Makefile $(RELEASE_DIR)/
-	@cp display.conf $(SERVICEFILE) $(PRESETFILE) README.md $(RELEASE_DIR)/
+	@cp uctronics-display.conf $(SERVICEFILE) $(PRESETFILE) README.md $(RELEASE_DIR)/
 	@cp tests/*.c tests/*.h tests/*.conf tests/README.md $(RELEASE_DIR)/tests/ 2>/dev/null || true
 	@tar -czf $(RELEASE_NAME).tar.gz -C /tmp $(RELEASE_NAME)
 	@rm -rf $(RELEASE_DIR)

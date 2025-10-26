@@ -20,14 +20,16 @@ make
 Run manually:
 ```bash
 cd C
-./display              # Uses default config file locations
-./display -h           # Show help and config file search order
-./display -c custom.conf  # Use custom config file
+./uctronics-display              # Uses default config file locations
+./uctronics-display -h           # Show help and config file search order
+./uctronics-display -c custom.conf  # Use custom config file
 ```
 
 Install as systemd service (runs on boot):
 ```bash
-sudo ./setup_display_service.sh
+make
+sudo make install
+sudo systemctl enable --now uctronics-display.service
 ```
 
 Service management:
@@ -49,10 +51,9 @@ sudo python3 ssd1306_stats.py
 
 The display is configured via an INI-style configuration file. The program searches for configuration in this order:
 
-1. Command-line specified: `./display -c /path/to/config.conf`
+1. Command-line specified: `./uctronics-display -c /path/to/config.conf`
 2. System-wide: `/etc/uctronics-display.conf`
-3. Local to executable: `display.conf` (in same directory as binary)
-4. Built-in defaults
+3. Built-in defaults
 
 ### Configuration File Format
 
@@ -98,9 +99,14 @@ custom_display = UCTRONICS
 
 **`C/config.c` / `C/config.h`** - Configuration system
 - INI-style config file parser
-- `load_config()` reads `display.conf` and populates `DisplayConfig` structure
+- `load_config()` reads `uctronics-display.conf` and populates `DisplayConfig` structure
 - `set_default_config()` provides fallback defaults
 - Global `display_config` variable accessed throughout the codebase
+
+**`C/logger.c` / `C/logger.h`** - Logging system
+- Automatic syslog vs console detection
+- Supports ERROR, WARNING, INFO, DEBUG log levels
+- Timestamps for console output, syslog for service mode
 
 **`C/ssd1306_i2c.c`** - Main driver implementation
 - Low-level I2C communication via configurable `/dev/i2c-*` device
@@ -109,7 +115,8 @@ custom_display = UCTRONICS
 - Network interface querying (ioctl SIOCGIFADDR) using configured interface name
 
 **`C/display.c`** - Application entry point
-- Loads configuration from `display.conf` at startup
+- Loads configuration from `uctronics-display.conf` at startup
+- Initializes logging system (syslog for service, console for manual runs)
 - Initializes display via `ssd1306_begin()`
 - Cycles through 3 display modes every 3 seconds:
   - Mode 0: Temperature + CPU load + IP/custom text
@@ -133,19 +140,22 @@ The SSD1306 is a 128x32 monochrome OLED organized as 4 pages (rows) of 128 bytes
 
 ### System Integration
 
-**`setup_display_service.sh`** - Automated installer
-- Detects user home directory from `$SUDO_USER`
-- Compiles C program via Makefile
-- Creates systemd service file at `/etc/systemd/system/uctronics-display.service`
-- Enables and starts service
-- Service runs as root (required for I2C hardware access)
+**Makefile** - Build and installation system
+- `make` - Compiles all C source files
+- `make install` - Installs binary, config, service, and preset files
+- `make uninstall` - Removes all installed files
+- `make release` - Creates versioned tarball
+- Installs to `/usr/bin/uctronics-display`
+- Config at `/etc/uctronics-display.conf`
+- Service at `/usr/lib/systemd/system/uctronics-display.service`
+- Preset at `/usr/lib/systemd/system-preset/90-uctronics-display.preset`
 
 ## Platform Notes
 
 **Configuration vs. Code:**
-- All platform-specific settings are now in `C/display.conf`
+- All platform-specific settings are now in `C/uctronics-display.conf`
 - No need to modify C code for different platforms
-- Simply edit `display.conf` before running or installing the service
+- Simply edit `uctronics-display.conf` before running or installing the service
 
 **Supporting New Platforms:**
 1. Identify I2C bus: `ls /dev/i2c-*` → update `i2c_device` in config

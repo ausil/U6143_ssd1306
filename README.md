@@ -59,7 +59,7 @@ For detailed installation, configuration, and troubleshooting instructions, see:
 
 The C driver uses a configuration file instead of editing source code.
 
-Edit `/etc/uctronics-display.conf` (or `C/display.conf` before installation):
+Edit `/etc/uctronics-display.conf` (or `C/uctronics-display.conf` before installation):
 
 ```ini
 # I2C device path
@@ -225,7 +225,7 @@ Current version: **1.0.0**
 
 - **Removed:** `setup_display_service.sh` script
 - **New:** Makefile-based installation system
-- **New:** INI-style configuration file (`display.conf`)
+- **New:** INI-style configuration file (`uctronics-display.conf`)
 - **New:** Graceful shutdown with signal handling
 - **New:** Comprehensive error handling and logging
 - **New:** Version flag (`--version` / `-v`)
