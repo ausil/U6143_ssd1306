@@ -1,2 +1,4 @@
 C/uctronics-display
 C/*.o
+C/tests/test_config
+C/tests/*.o

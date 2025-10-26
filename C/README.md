@@ -204,6 +204,27 @@ make install DESTDIR=/tmp/package-root
 | `make uninstall-service` | Remove service only |
 | `make enable-service` | Enable and start the service |
 | `make disable-service` | Stop and disable the service |
+| `make test` | Run automated tests |
+| `make test-clean` | Remove test artifacts |
+
+## Testing
+
+The project includes automated tests for configuration parsing and other non-hardware components.
+
+### Run Tests
+
+```bash
+make test
+```
+
+All tests should pass:
+```
+Running test suite: Configuration Parser Tests
+...
+✓ All tests passed!
+```
+
+See [tests/README.md](tests/README.md) for detailed testing documentation.
 
 ## Features
 
@@ -212,6 +233,7 @@ make install DESTDIR=/tmp/package-root
 - **Flexible Configuration:** INI-style config file with multiple search locations
 - **Auto-Restart:** Systemd service automatically restarts on failure
 - **Platform Independent:** Works on Raspberry Pi, Rock 3C, and other SBCs
+- **Tested:** Automated tests for configuration parser
 
 ## Troubleshooting
 

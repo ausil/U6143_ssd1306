@@ -22,8 +22,8 @@ $(Target): $(OBJ)
 %.o: %.c
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean install uninstall install-service uninstall-service enable-service disable-service
-clean:
+.PHONY: clean install uninstall install-service uninstall-service enable-service disable-service test test-clean
+clean: test-clean
 	rm -rf *.o
 	rm -rf $(Target)
 
@@ -60,3 +60,16 @@ disable-service:
 	systemctl stop $(SERVICEFILE)
 	systemctl disable $(SERVICEFILE)
 	@echo "Service stopped and disabled."
+
+# Test targets
+test: tests/test_config
+	@echo "Running tests..."
+	@./tests/test_config
+
+tests/test_config: tests/test_config.c config.o
+	@mkdir -p tests
+	$(CXX) $(CFLAGS) tests/test_config.c config.o -o tests/test_config
+
+test-clean:
+	rm -f tests/test_config
+	rm -f tests/*.o
