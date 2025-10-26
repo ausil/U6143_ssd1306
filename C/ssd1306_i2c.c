@@ -288,7 +288,19 @@ void LCD_DisplayTemperature(void)
   }
   else
   {
-    OLED_ShowString(0,0,(unsigned char*)display_config.custom_display,8);          //Send the custom text to the lower machine
+    char hostname[64] = {0};
+    if (gethostname(hostname, sizeof(hostname)) == 0) {
+      // Truncate to short hostname (remove domain)
+      char *dot = strchr(hostname, '.');
+      if (dot != NULL) {
+        *dot = '\0';
+      }
+      OLED_ShowString(0,0,(unsigned char*)hostname,8);        //Send the hostname to the lower machine
+      log_debug("Displaying hostname: %s", hostname);
+    } else {
+      log_error("Failed to get hostname: %s", strerror(errno));
+      OLED_ShowString(0,0,(unsigned char*)display_config.custom_display,8);  //Fallback to custom text
+    }
   }
 
   if(temp>=100)

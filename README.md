@@ -71,10 +71,10 @@ temperature_type = fahrenheit
 # Network interface: eth0, end0, wlan0, etc.
 network_interface = end0
 
-# IP display: open (show IP) or close (show custom text)
+# IP display: open (show IP) or close (show hostname)
 ip_switch = open
 
-# Custom text (when ip_switch = close)
+# Custom text (fallback when hostname unavailable)
 custom_display = UCTRONICS
 ```
 

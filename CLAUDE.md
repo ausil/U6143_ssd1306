@@ -67,10 +67,10 @@ temperature_type = fahrenheit
 # Network interface name - the actual interface to query for IP
 network_interface = end0
 
-# IP display: open (show IP), close (show custom text)
+# IP display: open (show IP), close (show hostname)
 ip_switch = open
 
-# Custom text (shown when ip_switch = close)
+# Custom text (fallback when hostname unavailable)
 custom_display = UCTRONICS
 ```
 
@@ -91,7 +91,7 @@ custom_display = UCTRONICS
 
 **IP Display:**
 - `open` = display IP address on screen
-- `close` = display custom text instead
+- `close` = display short hostname (domain removed), fallback to custom_display if unavailable
 
 ## Architecture
 

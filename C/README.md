@@ -140,8 +140,8 @@ When `-c` option is not specified:
 | `i2c_device` | `/dev/i2c-*` | I2C device path |
 | `temperature_type` | `celsius`, `fahrenheit` | Temperature units |
 | `network_interface` | `eth0`, `end0`, `wlan0`, etc. | Network interface to query |
-| `ip_switch` | `open`, `close` | Show IP address or custom text |
-| `custom_display` | Any text (max 31 chars) | Custom text when IP display is closed |
+| `ip_switch` | `open`, `close` | Show IP address (`open`) or hostname (`close`) |
+| `custom_display` | Any text (max 31 chars) | Fallback text when hostname unavailable |
 
 ### Platform-Specific Settings
 
