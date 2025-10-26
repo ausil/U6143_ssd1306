@@ -17,6 +17,7 @@ Supports Raspberry Pi, Rock 3C, and other compatible single-board computers.
   - Systemd service integration
   - Auto-restart on failure
   - Platform-independent design
+  - Automatic logging (syslog for service, console for manual runs)
 
 ## Quick Start
 
@@ -190,8 +191,14 @@ Device should appear at address `0x3c`.
 ### Service Not Starting
 
 ```bash
+# Check status
 systemctl status uctronics-display.service
+
+# View logs
 journalctl -u uctronics-display.service -n 50
+
+# Follow logs in real-time
+journalctl -u uctronics-display.service -f
 ```
 
 ### IP Shows 0.0.0.0
@@ -220,9 +227,10 @@ Current version: **1.0.0**
 - **New:** Makefile-based installation system
 - **New:** INI-style configuration file (`display.conf`)
 - **New:** Graceful shutdown with signal handling
-- **New:** Comprehensive error handling
+- **New:** Comprehensive error handling and logging
 - **New:** Version flag (`--version` / `-v`)
 - **New:** Systemd preset file for automatic service enablement
+- **New:** Automatic logging to syslog (when running as service) or console
 - **Changed:** Binary renamed from `display` to `uctronics-display`
 - **Changed:** Configuration via file instead of editing header files
 - **Improved:** Systemd service integration

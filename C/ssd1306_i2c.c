@@ -6,6 +6,7 @@
 #include "ssd1306_i2c.h"
 #include "bmp.h"
 #include "oled_fonts.h"
+#include "logger.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -27,21 +28,24 @@ DisplayConfig display_config;
 void ssd1306_begin(unsigned int vccstate, unsigned int i2caddr)
 {
   // I2C Init - use device from config
+  log_debug("Opening I2C device: %s", display_config.i2c_device);
   i2cd = open(display_config.i2c_device, O_RDWR);
   if (i2cd < 0)
   {
-	  fprintf(stderr, "Error: Device %s failed to initialize: %s\n",
+	  log_error("Device %s failed to initialize: %s",
 	          display_config.i2c_device, strerror(errno));
 	  return;
   }
+  log_debug("Setting I2C slave address to 0x%02x", i2caddr);
  if (ioctl(i2cd, I2C_SLAVE_FORCE, i2caddr) < 0)
   {
-    fprintf(stderr, "Error: Failed to set I2C slave address 0x%02x: %s\n",
+    log_error("Failed to set I2C slave address 0x%02x: %s",
             i2caddr, strerror(errno));
     close(i2cd);
     i2cd = -1;
     return;
   }
+  log_debug("I2C device initialized successfully");
 	OLED_WR_Byte(0xAE,OLED_CMD);//Disable display
 	OLED_WR_Byte(0x40,OLED_CMD);//---set low column address
 	OLED_WR_Byte(0xB0,OLED_CMD);//---set high column address
@@ -258,9 +262,10 @@ void LCD_DisplayTemperature(void)
   FILE * fp;
   char buffer[80] = {0};
   temp=Obaintemperature();                  //Gets the temperature of the CPU
+  log_debug("CPU temperature: %d", temp);
   fp=popen("top -bn1 | grep load | awk '{printf \"%.2f\", $(NF-2)}'","r");    //Gets the load on the CPU
   if (fp == NULL) {
-    fprintf(stderr, "Error: Failed to execute command for CPU load: %s\n", strerror(errno));
+    log_error("Failed to execute command for CPU load: %s", strerror(errno));
     strcpy(buffer, "0.00");
   } else {
     if (fgets(buffer, sizeof(buffer), fp) == NULL) {
@@ -268,6 +273,7 @@ void LCD_DisplayTemperature(void)
     }
     pclose(fp);
   }
+  log_debug("CPU load: %s", buffer);
   buffer[3]='\0';
 
   OLED_Clear();                                        //Remove the interface
@@ -344,6 +350,7 @@ void LCD_DisPlayCpuMemory(void)
     FILE* fp=fopen("/proc/meminfo","r");
     if(fp==NULL)
     {
+      log_error("Failed to open /proc/meminfo");
       return ;
     }
     while(fgets(buffer,sizeof(buffer),fp))
@@ -453,9 +460,11 @@ int FirstGetIpAddress(void)
     char* ip = GetIpAddress();
     if (ip != NULL) {
         strcpy(IPSource, ip);
+        log_info("Network interface %s has IP: %s", display_config.network_interface, ip);
         return 1;  // Success
     }
     strcpy(IPSource, "0.0.0.0");
+    log_warning("Failed to get IP address for interface %s", display_config.network_interface);
     return 0;  // Failure
 }
 
@@ -467,7 +476,7 @@ char* GetIpAddress(void)
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
-        fprintf(stderr, "Error: Failed to create socket for network query: %s\n", strerror(errno));
+        log_error("Failed to create socket for network query: %s", strerror(errno));
         return NULL;
     }
 
@@ -486,7 +495,7 @@ char* GetIpAddress(void)
     }
     else
     {
-        fprintf(stderr, "Warning: Failed to get IP address for interface %s: %s\n",
+        log_debug("Failed to get IP address for interface %s: %s",
                 display_config.network_interface, strerror(errno));
         return NULL;
     }

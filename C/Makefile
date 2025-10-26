@@ -90,9 +90,9 @@ release: clean
 	@mkdir -p $(RELEASE_DIR)/tests
 	@cp *.c *.h Makefile $(RELEASE_DIR)/
 	@cp display.conf $(SERVICEFILE) $(PRESETFILE) README.md $(RELEASE_DIR)/
-	@cp tests/*.c tests/*.h tests/*.conf tests/README.md $(RELEASE_DIR)/tests/
+	@cp tests/*.c tests/*.h tests/*.conf tests/README.md $(RELEASE_DIR)/tests/ 2>/dev/null || true
 	@tar -czf $(RELEASE_NAME).tar.gz -C /tmp $(RELEASE_NAME)
 	@rm -rf $(RELEASE_DIR)
 	@echo "Release tarball created: $(RELEASE_NAME).tar.gz"
 	@echo "Contents:"
-	@tar -tzf $(RELEASE_NAME).tar.gz | head -20
+	@tar -tzf $(RELEASE_NAME).tar.gz | head -25

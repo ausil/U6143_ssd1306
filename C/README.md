@@ -242,6 +242,7 @@ See [tests/README.md](tests/README.md) for detailed testing documentation.
 - **Auto-Restart:** Systemd service automatically restarts on failure
 - **Platform Independent:** Works on Raspberry Pi, Rock 3C, and other SBCs
 - **Tested:** Automated tests for configuration parser
+- **Logging:** Automatic logging to syslog when running as service, console output otherwise
 
 ## Troubleshooting
 
@@ -276,7 +277,14 @@ systemctl status uctronics-display.service
 
 **View detailed logs:**
 ```bash
+# View last 50 lines
 journalctl -u uctronics-display.service -n 50
+
+# Follow logs in real-time
+journalctl -u uctronics-display.service -f
+
+# View all logs since boot
+journalctl -u uctronics-display.service -b
 ```
 
 **Check config file:**

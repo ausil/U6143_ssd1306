@@ -7,6 +7,7 @@ Demo for ssd1306 i2c driver for  Raspberry Pi
 #include <signal.h>
 #include "ssd1306_i2c.h"
 #include "config.h"
+#include "logger.h"
 #include "time.h"
 #include <unistd.h>
 
@@ -25,12 +26,13 @@ void signal_handler(int signum)
 void cleanup(void)
 {
     if (i2cd >= 0) {
-        printf("Cleaning up...\n");
+        log_info("Cleaning up...");
         OLED_Clear();
         close(i2cd);
         i2cd = -1;
-        printf("I2C device closed\n");
+        log_info("I2C device closed");
     }
+    log_close();
 }
 
 /* Print usage information */
@@ -55,9 +57,9 @@ void print_usage(const char *prog_name)
 int try_load_config(const char *config_path)
 {
     if (access(config_path, F_OK) == 0) {
-        printf("Trying config file: %s\n", config_path);
+        log_info("Trying config file: %s", config_path);
         if (load_config(config_path, &display_config)) {
-            printf("Configuration loaded successfully from: %s\n", config_path);
+            log_info("Configuration loaded successfully from: %s", config_path);
             return 1;
         }
     }
@@ -70,6 +72,16 @@ int main(int argc, char *argv[])
     const char *config_file = NULL;
     int config_loaded = 0;
     struct sigaction sa;
+    int use_syslog = 0;
+
+    /* Check if running as a service (no controlling terminal) */
+    if (!isatty(STDIN_FILENO)) {
+        use_syslog = 1;
+    }
+
+    /* Initialize logging */
+    log_init("uctronics-display", use_syslog);
+    log_info("Starting uctronics-display version %s", VERSION);
 
     /* Register cleanup function to be called on exit */
     atexit(cleanup);
@@ -81,10 +93,10 @@ int main(int argc, char *argv[])
     sa.sa_flags = 0;
 
     if (sigaction(SIGINT, &sa, NULL) == -1) {
-        fprintf(stderr, "Warning: Failed to register SIGINT handler\n");
+        log_warning("Failed to register SIGINT handler");
     }
     if (sigaction(SIGTERM, &sa, NULL) == -1) {
-        fprintf(stderr, "Warning: Failed to register SIGTERM handler\n");
+        log_warning("Failed to register SIGTERM handler");
     }
 
     /* Parse command-line arguments */
@@ -113,12 +125,12 @@ int main(int argc, char *argv[])
     /* Load configuration */
     if (config_file != NULL) {
         /* User specified config file via command line */
-        printf("Loading configuration from %s...\n", config_file);
+        log_info("Loading configuration from %s...", config_file);
         if (load_config(config_file, &display_config)) {
-            printf("Configuration loaded successfully\n");
+            log_info("Configuration loaded successfully");
             config_loaded = 1;
         } else {
-            fprintf(stderr, "Error: Could not load specified config file: %s\n", config_file);
+            log_error("Could not load specified config file: %s", config_file);
             return 1;
         }
     } else {
@@ -129,27 +141,32 @@ int main(int argc, char *argv[])
     }
 
     if (!config_loaded) {
-        printf("No configuration file found, using built-in defaults\n");
+        log_info("No configuration file found, using built-in defaults");
         set_default_config(&display_config);
     }
 
     /* Print configuration for debugging */
-    print_config(&display_config);
+    log_debug("I2C device: %s", display_config.i2c_device);
+    log_debug("Temperature type: %s", display_config.temperature_type == CELSIUS ? "celsius" : "fahrenheit");
+    log_debug("Network interface: %s", display_config.network_interface);
+    log_debug("IP switch: %s", display_config.ip_switch == IP_DISPLAY_OPEN ? "open" : "close");
+    log_debug("Custom display: %s", display_config.custom_display);
 
     /* Initialize display */
+    log_info("Initializing display on device %s", display_config.i2c_device);
     ssd1306_begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS);      //LCD Screen initialization
     if(i2cd<0)
     {
-        fprintf(stderr, "Error: I2C device failed to open\n");
+        log_error("I2C device failed to open");
         return 1;
     }
     usleep(150*1000);                                                  //Short delay Ensure the normal response of the lower function
 
     if (!FirstGetIpAddress()) {
-        fprintf(stderr, "Warning: Failed to get IP address, will use fallback\n");
+        log_warning("Failed to get IP address, will use fallback");
     }
 
-    printf("Display initialized successfully. Press Ctrl+C to exit.\n");
+    log_info("Display initialized successfully on interface %s", display_config.network_interface);
 
     /* Main display loop */
     while(keep_running)
@@ -163,6 +180,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("\nShutdown signal received, exiting gracefully...\n");
+    log_info("Shutdown signal received, exiting gracefully");
     return 0;
 }
