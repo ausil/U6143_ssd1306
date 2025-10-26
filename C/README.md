@@ -206,6 +206,7 @@ make install DESTDIR=/tmp/package-root
 | `make disable-service` | Stop and disable the service |
 | `make test` | Run automated tests |
 | `make test-clean` | Remove test artifacts |
+| `make release` | Create release tarball (e.g., uctronics-display-1.0.0.tar.gz) |
 
 ## Testing
 

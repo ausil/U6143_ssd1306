@@ -1,3 +1,4 @@
+VERSION		= 1.0.0
 Target		= uctronics-display
 CXX         	= gcc
 CFLAGS		= -Wall -g
@@ -22,7 +23,7 @@ $(Target): $(OBJ)
 %.o: %.c
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean install uninstall install-service uninstall-service enable-service disable-service test test-clean
+.PHONY: clean install uninstall install-service uninstall-service enable-service disable-service test test-clean release
 clean: test-clean
 	rm -rf *.o
 	rm -rf $(Target)
@@ -73,3 +74,21 @@ tests/test_config: tests/test_config.c config.o
 test-clean:
 	rm -f tests/test_config
 	rm -f tests/*.o
+
+# Create release tarball
+RELEASE_NAME = $(Target)-$(VERSION)
+RELEASE_DIR = /tmp/$(RELEASE_NAME)
+
+release: clean
+	@echo "Creating release tarball: $(RELEASE_NAME).tar.gz"
+	@rm -rf $(RELEASE_DIR)
+	@mkdir -p $(RELEASE_DIR)
+	@mkdir -p $(RELEASE_DIR)/tests
+	@cp *.c *.h Makefile $(RELEASE_DIR)/
+	@cp display.conf $(SERVICEFILE) README.md $(RELEASE_DIR)/
+	@cp tests/*.c tests/*.h tests/*.conf tests/README.md $(RELEASE_DIR)/tests/
+	@tar -czf $(RELEASE_NAME).tar.gz -C /tmp $(RELEASE_NAME)
+	@rm -rf $(RELEASE_DIR)
+	@echo "Release tarball created: $(RELEASE_NAME).tar.gz"
+	@echo "Contents:"
+	@tar -tzf $(RELEASE_NAME).tar.gz | head -20

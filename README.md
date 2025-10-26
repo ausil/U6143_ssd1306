@@ -169,6 +169,8 @@ The display cycles through 3 modes every 3 seconds:
 | `make uninstall` | Remove everything |
 | `make enable-service` | Enable and start the service |
 | `make disable-service` | Stop and disable the service |
+| `make test` | Run automated tests |
+| `make release` | Create release tarball (e.g., uctronics-display-1.0.0.tar.gz) |
 
 ## Troubleshooting
 
@@ -206,24 +208,23 @@ sudo nano /etc/uctronics-display.conf
 sudo systemctl restart uctronics-display.service
 ```
 
+## Version
+
+Current version: **1.0.0**
+
 ## Changes from Previous Versions
 
-### v2.0 (Current)
+### v1.0.0 (Current)
 
 - **Removed:** `setup_display_service.sh` script
 - **New:** Makefile-based installation system
 - **New:** INI-style configuration file (`display.conf`)
 - **New:** Graceful shutdown with signal handling
 - **New:** Comprehensive error handling
+- **New:** Version flag (`--version` / `-v`)
 - **Changed:** Binary renamed from `display` to `uctronics-display`
 - **Changed:** Configuration via file instead of editing header files
 - **Improved:** Systemd service integration
-
-### v1.0 (Legacy)
-
-- Required editing `ssd1306_i2c.h` for configuration
-- Used `setup_display_service.sh` for installation
-- Limited error handling
 
 ## Contributing
 

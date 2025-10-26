@@ -5,6 +5,8 @@ This library just support 128X32 lcd with i2c interface;
 #ifndef SSD1306_I2C_H_
 #define SSD1306_I2C_H_
 
+#define VERSION "1.0.0"
+
 #include "config.h"
 
 extern int i2cd;

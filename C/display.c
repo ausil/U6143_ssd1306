@@ -43,6 +43,7 @@ void print_usage(const char *prog_name)
     printf("Options:\n");
     printf("  -c, --config FILE    Use specified configuration file\n");
     printf("  -h, --help           Show this help message\n");
+    printf("  -v, --version        Show version information\n");
     printf("\n");
     printf("Configuration file search order (if -c not specified):\n");
     printf("  1. %s\n", SYSTEM_CONFIG_FILE);
@@ -98,6 +99,9 @@ int main(int argc, char *argv[])
             }
         } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             print_usage(argv[0]);
+            return 0;
+        } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
+            printf("uctronics-display version %s\n", VERSION);
             return 0;
         } else {
             fprintf(stderr, "Error: Unknown option '%s'\n", argv[i]);
